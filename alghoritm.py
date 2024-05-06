@@ -92,9 +92,9 @@ class Alghoritm:
             print("Mutation is going on...")
             index1 = random.randint(0, self.content_len-1)
             index2 = random.randint(0, self.content_len-1)
-            copy = chromosome.content[index1]
-            chromosome.content[index1] = chromosome.content[index2]
-            chromosome.content[index2] = copy
+            while index2 == index1:  # Zapewnienie, że index2 jest różny od index1
+                index2 = random.randint(0, self.content_len-1)
+            chromosome.content[index1], chromosome.content[index2] = chromosome.content[index2], chromosome.content[index1]
         
     def Selection(self):
         self.population = sorted(self.population, key=lambda chromosome: chromosome.fitness, reverse=True)
