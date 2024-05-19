@@ -1,9 +1,7 @@
 import random
 import sys
 import copy
-
 from chromosome import Chromosome
-
 
 """ Nazwy plikow z danymi """
 
@@ -74,19 +72,27 @@ class Alghoritm:
     def CrossOver(self, parents):
         # Losowanie indeksu cut_point
         if self.cross_over_rate > random.random():
-            cut_point = random.randint(1, len(parents[0].content) - 2)
-            parents[0].content[:cut_point], parents[1].content[:cut_point] = parents[1].content[:cut_point], parents[0].content[:cut_point]
+            # Tworzenie kopi rodziców
+            parent1_copy = copy.deepcopy(parents[0])
+            parent2_copy = copy.deepcopy(parents[1])
+            
+            cut_point = random.randint(1, len(parent1_copy.content) - 2)
+            parent1_copy.content[:cut_point], parent2_copy.content[:cut_point] = parent2_copy.content[:cut_point], parent1_copy.content[:cut_point]
             
             """ Mutacja """
-            self.Mutation(parents[0])
-            self.Mutation(parents[1])
+            self.Mutation(parent1_copy)
+            self.Mutation(parent2_copy)
             
-            parents[0].calculate_fitness(self.base)
-            parents[1].calculate_fitness(self.base)
+            parent1_copy.calculate_fitness(self.base)
+            parent2_copy.calculate_fitness(self.base)
             
-            parents[0].able_to_cross = False
-            parents[1].able_to_cross = False
+            parent1_copy.able_to_cross = False
+            parent2_copy.able_to_cross = False
+            
+            return [parent1_copy, parent2_copy]
         
+        return parents
+    
     def Mutation(self, chromosome):
         if self.mutation_rate > random.random():
             print("Mutation is going on...")
@@ -117,7 +123,7 @@ class Alghoritm:
         best.calculate_fitness(self.base)
         """ MAIN LOOP """
         for _ in range(100):
-            # Aktualizacaja fitness i zdolnosci to reprodukcji
+            # Aktualizacja fitness i zdolnosci to reprodukcji
             for chromosome in self.population:
                 chromosome.calculate_fitness(self.base)
                 chromosome.able_to_cross = True
@@ -141,7 +147,9 @@ class Alghoritm:
                         parent = random.choice(self.population)
                     parent.able_to_cross = False
                     """ CROSS OVER i MUTACJA - zmiany w genach """
-                    self.CrossOver([chromosome, parent])
+                    offspring = self.CrossOver([chromosome, parent])
+                    self.population[self.population.index(chromosome)] = offspring[0]
+                    self.population[self.population.index(parent)] = offspring[1]
 
                     best_chromosome = max(self.population, key=lambda chromosome: chromosome.fitness)
                     if best_chromosome.fitness > best.fitness:
@@ -162,4 +170,3 @@ class Alghoritm:
             print("Items: ", best.content, " fitness: ", best.fitness, " weight: ", best.weight, " profit: ", best.profit)
         else:
             print("No solution found, check input files")
-            
