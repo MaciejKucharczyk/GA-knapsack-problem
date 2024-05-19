@@ -110,7 +110,7 @@ class Alghoritm:
         for chromosome in pop:
             print("Items: ", chromosome.content, " fitness: ", chromosome.fitness, " weight: ", chromosome.weight, " profit: ", chromosome.profit)
     
-    def Run(self): 
+    def Run_before(self): 
         self.Read_population(weights, profits, size, dir)
         self.Create_population()
         print("Initial population: ")
@@ -157,6 +157,79 @@ class Alghoritm:
                         best.calculate_fitness(self.base)
 
                     print("Content: ",  best.content, " fitness: ", best.fitness)
+                        
+            # print("After: ")
+            # self.Selection()
+            # self.print_population(self.population)        
+        
+        self.population = sorted(self.population, key=lambda chromosome: chromosome.fitness, reverse=True)
+        print("Final population: ")
+        self.print_population(self.population)
+        if self.population != []:
+            print("Best : ")
+            print("Items: ", best.content, " fitness: ", best.fitness, " weight: ", best.weight, " profit: ", best.profit)
+        else:
+            print("No solution found, check input files")
+            
+    def Selection_roulette_wheel(self):
+        total_fitness = sum(chromosome.fitness for chromosome in self.population)
+        pick = random.uniform(0, total_fitness)
+        current = 0
+        for chromosome in self.population:
+            current += chromosome.fitness
+            if current > pick:
+                return chromosome
+        
+    def Run(self): 
+        self.Read_population(weights, profits, size, dir)
+        self.Create_population()
+        
+        print("Initial population: ")
+        for chromosome in self.population:
+            chromosome.calculate_fitness(self.base)
+            print("Items: ", chromosome.content, " fitness: ", chromosome.fitness)
+        
+        best_copy = max(self.population, key=lambda chromosome: chromosome.fitness)
+        best = Chromosome(best_copy.content)
+        best.calculate_fitness(self.base)
+        """ MAIN LOOP """
+        for _ in range(1000):
+            new_population = []
+            # Aktualizacja fitness i zdolnosci to reprodukcji
+            for chromosome in self.population:
+                chromosome.calculate_fitness(self.base)
+                chromosome.able_to_cross = True
+            """ SELEKCJA - ruletka
+            === Wybor rodzicow do reprodukcji:
+            - rodzice sa wybierani za pomoca kola ruletki
+            - w danej iteracji MAIN LOOP tworzona jest nowa populacja
+            - nowa populacja jest tworzona z dzieci poprzedniej populacji
+            - nowa populacja zastepuje poprzednia populacje, kiedy beda miec takie same rozmiary
+            """
+            
+            while len(new_population) < len(self.population):
+                parent1 = self.Selection_roulette_wheel()
+                parent2 = self.Selection_roulette_wheel()
+                """ CROSS OVER i MUTACJA - zmiany w genach """
+                offspring = self.CrossOver([parent1, parent2])
+                new_population.append(offspring[0])
+                if len(new_population) < len(self.population):
+                    new_population.append(offspring[1])
+
+            self.population = copy.deepcopy(new_population)
+            
+            print("New population: ")
+            for chromosome in self.population:
+                chromosome.calculate_fitness(self.base)
+                print("Items: ", chromosome.content, " fitness: ", chromosome.fitness)
+            
+            best_chromosome = max(self.population, key=lambda chromosome: chromosome.fitness)
+            if best_chromosome.fitness > best.fitness:
+                best.content = best_chromosome.content
+                best.calculate_fitness(self.base)
+
+            print("Best solution: ")
+            print("Content: ",  best.content, " fitness: ", best.fitness)
                         
             # print("After: ")
             # self.Selection()
