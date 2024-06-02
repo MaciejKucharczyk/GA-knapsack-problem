@@ -125,94 +125,33 @@ class Alghoritm:
     def plot_comparison(self, best_chromosome):
         optimal_weights = [self.base.weights[i] for i in range(len(self.optimal_solution)) if self.optimal_solution[i] == 1]
         optimal_profits = [self.base.profits[i] for i in range(len(self.optimal_solution)) if self.optimal_solution[i] == 1]
-        
+    
         algo_weights = [self.base.weights[i] for i in range(len(best_chromosome.content)) if best_chromosome.content[i] == 1]
         algo_profits = [self.base.profits[i] for i in range(len(best_chromosome.content)) if best_chromosome.content[i] == 1]
-        
+
+        total_optimal_weight = sum(optimal_weights)
+        total_optimal_profit = sum(optimal_profits)
+        total_algo_weight = sum(algo_weights)
+        total_algo_profit = sum(algo_profits)
+    
+        print(f"Optimal Solution Total Weight: {total_optimal_weight}, Total Profit: {total_optimal_profit}")
+        print(f"Algorithm's Best Solution Total Weight: {total_algo_weight}, Total Profit: {total_algo_profit}")
+    
         fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-        
         ax[0].bar(range(len(optimal_weights)), optimal_weights, color='blue', alpha=0.6, label='Optimal Solution')
         ax[0].bar(range(len(algo_weights)), algo_weights, color='red', alpha=0.6, label='Algorithm Solution')
         ax[0].set_title('Weight Comparison')
         ax[0].set_xlabel('Item Index')
         ax[0].set_ylabel('Weight')
         ax[0].legend()
-        
         ax[1].bar(range(len(optimal_profits)), optimal_profits, color='blue', alpha=0.6, label='Optimal Solution')
         ax[1].bar(range(len(algo_profits)), algo_profits, color='red', alpha=0.6, label='Algorithm Solution')
         ax[1].set_title('Profit Comparison')
         ax[1].set_xlabel('Item Index')
         ax[1].set_ylabel('Profit')
         ax[1].legend()
-        
         plt.show()
-    
-    def Run_before(self): 
-        self.Read_population(weights, profits, size, dir)
-        self.Read_optimal_solution(optimal, dir)
-        self.Create_population()
-        print("Initial population: ")
-        for chromosome in self.population:
-            chromosome.calculate_fitness(self.base)
-            print("Items: ", chromosome.content, " fitness: ", chromosome.fitness)
         
-        best_copy = max(self.population, key=lambda chromosome: chromosome.fitness)
-        best = Chromosome(best_copy.content)
-        best.calculate_fitness(self.base)
-        """ MAIN LOOP """
-        for _ in range(100):
-            # Aktualizacja fitness i zdolnosci to reprodukcji
-            for chromosome in self.population:
-                chromosome.calculate_fitness(self.base)
-                chromosome.able_to_cross = True
-            """ SELEKCJA - sortowanie populacji ze wzgledu na fitness"""
-            self.population = sorted(self.population, key=lambda chromosome: chromosome.fitness, reverse=True)           
-            # print("Before: ")
-            # self.print_population(self.population)
-            # print("best: ", best.content, " fitness: ", best.fitness)
-            """
-            # Wybor rodzicow do reprodukcji:
-            # Rodzic 1 jest brany z poczatku posortowanej listy z populacja
-            # Rodzic 2 jest losowany
-            # Kazdy chromosom moze wziac udzial w reprodukcji (w danej iteracji) tylko raz (pole able_to_cross)
-            # Dzieci z danej iteracji nie sa zdolne do reprodukcji
-            """
-            for chromosome in self.population:
-                if chromosome.able_to_cross:
-                    chromosome.able_to_cross = False
-                    parent = chromosome
-                    while parent == chromosome and parent.able_to_cross == False:
-                        parent = random.choice(self.population)
-                    parent.able_to_cross = False
-                    """ CROSS OVER i MUTACJA - zmiany w genach """
-                    offspring = self.CrossOver([chromosome, parent])
-                    self.population[self.population.index(chromosome)] = offspring[0]
-                    self.population[self.population.index(parent)] = offspring[1]
-
-                    best_chromosome = max(self.population, key=lambda chromosome: chromosome.fitness)
-                    if best_chromosome.fitness > best.fitness:
-                        best.content = best_chromosome.content
-                        best.calculate_fitness(self.base)
-
-                    print("Content: ",  best.content, " fitness: ", best.fitness)
-                        
-            # print("After: ")
-            # self.Selection()
-            # self.print_population(self.population)        
-        
-        self.population = sorted(self.population, key=lambda chromosome: chromosome.fitness, reverse=True)
-        print("Final population: ")
-        self.print_population(self.population)
-        if self.population != []:
-            print("Best : ")
-            print("Items: ", best.content, " fitness: ", best.fitness, " weight: ", best.weight, " profit: ", best.profit)
-            print("Optimal Solution: ", self.optimal_solution)
-            print("Algorithm's Best Solution: ", best.content)
-            print("Match: ", self.optimal_solution == best.content)
-            self.plot_comparison(best)
-        else:
-            print("No solution found, check input files")
-            
     def Selection_roulette_wheel(self):
         total_fitness = sum(chromosome.fitness for chromosome in self.population)
         pick = random.uniform(0, total_fitness)
