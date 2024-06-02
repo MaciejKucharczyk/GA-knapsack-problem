@@ -1,6 +1,7 @@
 import random
 import sys
 import copy
+import matplotlib.pyplot as plt
 from chromosome import Chromosome
 
 """ Nazwy plikow z danymi """
@@ -8,6 +9,7 @@ from chromosome import Chromosome
 weights = "weights.txt"
 profits = "profits.txt"
 size = "size.txt"
+optimal = "optimal.txt"
 dir = "w15c1458"
 
 class Base:
@@ -27,6 +29,7 @@ class Alghoritm:
         self.size_of_pop = 10
         self.base = Base()
         self.content_len = 0
+        self.optimal_solution = []
     
     """ Tworzenie zawartosci dla chromosomu """
     
@@ -68,6 +71,15 @@ class Alghoritm:
             size_file.close()
         except FileNotFoundError:
             print("File with Size not found...")
+
+    """ Odczyt optymalnego rozwiązania """
+    def Read_optimal_solution(self, filename, dir):
+        try:
+            optimal_file = open(f"./data/{dir}/{filename}", "r")
+            self.optimal_solution = [int(line.strip()) for line in optimal_file]
+            optimal_file.close()
+        except FileNotFoundError:
+            print("File with Optimal Solution not found...")
     
     def CrossOver(self, parents):
         # Losowanie indeksu cut_point
@@ -110,8 +122,34 @@ class Alghoritm:
         for chromosome in pop:
             print("Items: ", chromosome.content, " fitness: ", chromosome.fitness, " weight: ", chromosome.weight, " profit: ", chromosome.profit)
     
+    def plot_comparison(self, best_chromosome):
+        optimal_weights = [self.base.weights[i] for i in range(len(self.optimal_solution)) if self.optimal_solution[i] == 1]
+        optimal_profits = [self.base.profits[i] for i in range(len(self.optimal_solution)) if self.optimal_solution[i] == 1]
+        
+        algo_weights = [self.base.weights[i] for i in range(len(best_chromosome.content)) if best_chromosome.content[i] == 1]
+        algo_profits = [self.base.profits[i] for i in range(len(best_chromosome.content)) if best_chromosome.content[i] == 1]
+        
+        fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+        
+        ax[0].bar(range(len(optimal_weights)), optimal_weights, color='blue', alpha=0.6, label='Optimal Solution')
+        ax[0].bar(range(len(algo_weights)), algo_weights, color='red', alpha=0.6, label='Algorithm Solution')
+        ax[0].set_title('Weight Comparison')
+        ax[0].set_xlabel('Item Index')
+        ax[0].set_ylabel('Weight')
+        ax[0].legend()
+        
+        ax[1].bar(range(len(optimal_profits)), optimal_profits, color='blue', alpha=0.6, label='Optimal Solution')
+        ax[1].bar(range(len(algo_profits)), algo_profits, color='red', alpha=0.6, label='Algorithm Solution')
+        ax[1].set_title('Profit Comparison')
+        ax[1].set_xlabel('Item Index')
+        ax[1].set_ylabel('Profit')
+        ax[1].legend()
+        
+        plt.show()
+    
     def Run_before(self): 
         self.Read_population(weights, profits, size, dir)
+        self.Read_optimal_solution(optimal, dir)
         self.Create_population()
         print("Initial population: ")
         for chromosome in self.population:
@@ -168,6 +206,10 @@ class Alghoritm:
         if self.population != []:
             print("Best : ")
             print("Items: ", best.content, " fitness: ", best.fitness, " weight: ", best.weight, " profit: ", best.profit)
+            print("Optimal Solution: ", self.optimal_solution)
+            print("Algorithm's Best Solution: ", best.content)
+            print("Match: ", self.optimal_solution == best.content)
+            self.plot_comparison(best)
         else:
             print("No solution found, check input files")
             
@@ -182,6 +224,7 @@ class Alghoritm:
         
     def Run(self): 
         self.Read_population(weights, profits, size, dir)
+        self.Read_optimal_solution(optimal, dir)
         self.Create_population()
         
         print("Initial population: ")
@@ -241,5 +284,9 @@ class Alghoritm:
         if self.population != []:
             print("Best : ")
             print("Items: ", best.content, " fitness: ", best.fitness, " weight: ", best.weight, " profit: ", best.profit)
+            print("Optimal Solution: ", self.optimal_solution)
+            print("Algorithm's Best Solution: ", best.content)
+            print("Match: ", self.optimal_solution == best.content)
+            self.plot_comparison(best)
         else:
             print("No solution found, check input files")

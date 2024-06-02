@@ -24,11 +24,3 @@ class Chromosome:
         
         if weight > base.size:
             self.fitness = round(base.size / weight, 2)
-
-            
-            
-        
-        
-    
-    
-    

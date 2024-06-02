@@ -1,4 +1,0 @@
-w10: 309
-w15: 1458
-
-link: https://people.sc.fsu.edu/~jburkardt/datasets/knapsack_01/knapsack_01.html
