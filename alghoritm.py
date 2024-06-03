@@ -21,12 +21,12 @@ class Base:
 
 class Alghoritm:
     
-    def __init__(self):
-        self.mutation_rate = 0.01
-        self.cross_over_rate = 0.7
+    def __init__(self, mutation_rate = 0.01, ccross_over_rate = 0.7, size_of_pop = 10, epochs=1000):
+        self.mutation_rate = mutation_rate
+        self.cross_over_rate = ccross_over_rate
         self.population = [] 
-        self.selection_min = 10
-        self.size_of_pop = 10
+        self.epochs = epochs 
+        self.size_of_pop = size_of_pop
         self.base = Base()
         self.content_len = 0
         self.optimal_solution = []
@@ -107,7 +107,7 @@ class Alghoritm:
     
     def Mutation(self, chromosome):
         if self.mutation_rate > random.random():
-            print("Mutation is going on...")
+            # print("Mutation is going on...")
             index1 = random.randint(0, self.content_len-1)
             index2 = random.randint(0, self.content_len-1)
             while index2 == index1:  # Zapewnienie, że index2 jest różny od index1
@@ -123,6 +123,10 @@ class Alghoritm:
             print("Items: ", chromosome.content, " fitness: ", chromosome.fitness, " weight: ", chromosome.weight, " profit: ", chromosome.profit)
     
     def plot_comparison(self, best_chromosome):
+        
+        # data = DataCollection()
+        
+        
         optimal_weights = [self.base.weights[i] for i in range(len(self.optimal_solution)) if self.optimal_solution[i] == 1]
         optimal_profits = [self.base.profits[i] for i in range(len(self.optimal_solution)) if self.optimal_solution[i] == 1]
     
@@ -133,9 +137,27 @@ class Alghoritm:
         total_optimal_profit = sum(optimal_profits)
         total_algo_weight = sum(algo_weights)
         total_algo_profit = sum(algo_profits)
+        
+        relation_of_profit = (total_algo_profit / total_optimal_profit) * 100
+        relation_of_weight = (total_algo_weight / total_optimal_weight) * 100
+        
+        """ self.data.sizes.append(self.size_of_pop)
+        self.data.cross_over_rates.append(self.cross_over_rate)
+        self.data.mutation_rates.append(self.mutation_rate)
+        self.data.optimal_profits.append(total_optimal_profit)
+        self.data.alg_profits.append(total_algo_profit)
+         """
+        
+        print(f"Size of the population: {self.size_of_pop}")
+        print(f"Cross over rate: {self.cross_over_rate}")
+        print(f"Mutation rate: {self.mutation_rate}")
     
         print(f"Optimal Solution Total Weight: {total_optimal_weight}, Total Profit: {total_optimal_profit}")
         print(f"Algorithm's Best Solution Total Weight: {total_algo_weight}, Total Profit: {total_algo_profit}")
+        
+        print(f"Profit relation: {relation_of_profit}")
+        # print(f"Weight relation: {relation_of_weight}")
+        
     
         fig, ax = plt.subplots(1, 2, figsize=(12, 6))
         ax[0].bar(range(len(optimal_weights)), optimal_weights, color='blue', alpha=0.6, label='Optimal Solution')
@@ -151,6 +173,10 @@ class Alghoritm:
         ax[1].set_ylabel('Profit')
         ax[1].legend()
         plt.show()
+        
+        return total_algo_profit
+                
+        
         
     def Selection_roulette_wheel(self):
         total_fitness = sum(chromosome.fitness for chromosome in self.population)
@@ -175,7 +201,7 @@ class Alghoritm:
         best = Chromosome(best_copy.content)
         best.calculate_fitness(self.base)
         """ MAIN LOOP """
-        for _ in range(1000):
+        for _ in range(self.epochs):
             new_population = []
             # Aktualizacja fitness i zdolnosci to reprodukcji
             for chromosome in self.population:
@@ -200,18 +226,18 @@ class Alghoritm:
 
             self.population = copy.deepcopy(new_population)
             
-            print("New population: ")
+            # print("New population: ")
             for chromosome in self.population:
                 chromosome.calculate_fitness(self.base)
-                print("Items: ", chromosome.content, " fitness: ", chromosome.fitness)
+                # print("Items: ", chromosome.content, " fitness: ", chromosome.fitness)
             
             best_chromosome = max(self.population, key=lambda chromosome: chromosome.fitness)
             if best_chromosome.fitness > best.fitness:
                 best.content = best_chromosome.content
                 best.calculate_fitness(self.base)
 
-            print("Best solution: ")
-            print("Content: ",  best.content, " fitness: ", best.fitness)
+            # print("Best solution: ")
+            # print("Content: ",  best.content, " fitness: ", best.fitness)
                         
             # print("After: ")
             # self.Selection()
@@ -227,5 +253,8 @@ class Alghoritm:
             print("Algorithm's Best Solution: ", best.content)
             print("Match: ", self.optimal_solution == best.content)
             self.plot_comparison(best)
+            found_profit = self.plot_comparison(best)
+            return found_profit
         else:
             print("No solution found, check input files")
+            
